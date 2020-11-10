@@ -1,30 +1,33 @@
 #include <stdio.h>
-#include <fcntl.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include <sys/types.h>
-#include <sys/stat.h>
-int main()
+#include <sys/wait.h>
+ 
+int main(int argc, char* argv[]) 
 {
-int a;
-int lm=0;
-int nm=0;
-int line[100][100];
-char ch;
-FILE *file = fopen("hello.txt","r");
-line[0][0];
-while (read(file, &ch , sizeof(char))>0){
-nm++;
-if (ch == ('\n')) {
-line[lm][0]=nm;
-line[lm-1][1]=nm-line[lm-1][0];
-lm ++;
-}
-
-}
-scanf("%d", &a);
-lseek(file,line[a][0],SEEK_SET);
-for(int i=0;i<line[a][1];i++){
-read(file, &ch , sizeof(char));
-printf("%c",ch);
-}
-return 0;
+    int status;
+    switch(fork()) 
+    {
+        case -1:
+            perror("fork");
+            return 1;
+        case 0:
+            if ( execvp(argv[1], &argv[1]) == -1 ) 
+            {
+                perror("execl");
+                return 1;
+            }
+            break;
+        default:
+            if (wait(&status) >= 0)
+            {
+                if (WIFEXITED(status))
+                {
+                    printf("%d \n", WEXITSTATUS(status));
+                }
+            }
+            break;
+    }
+    return 0;
 }
